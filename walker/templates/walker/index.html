@@ -1,175 +1,71 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8"/>
-    <title>Chat Room</title>
+{% extends 'walker/base.html' %}
 
 
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
-          crossorigin="anonymous">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
-            integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
-            crossorigin="anonymous"></script>
+{% block header %}{% endblock %}
 
-    <style>
-
-        .header-menu {
-            position: fixed;
-            top: 0;
-            height: 50px;
-            width: 100%;
-            background: #466f9e;
-            color: #fff;
-            display: flex;
-            flex-direction: row;
-            justify-content: space-around;
-            align-items: center;
-        }
-
-        .menu-items {
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            align-items: center;
-
-        }
-
-        .menu-item {
-            display: inline-block;
-            max-height: 100px;
-            margin: 0 20px;
-            color: #fff;
-            text-transform: uppercase;
-        }
-
-        .menu-item a {
-            color: #fff;
-            font-weight: bold;
-        }
-
-        .menu-item img {
-            height: 100%;
-        }
+{% block content %}
 
 
-    </style>
-</head>
-<body>
+    <div class="row pt-5 mt-5" style="height: 100vh;">
+        <div class="col-2"></div>
 
-<div class="header-menu">
-    <div class="menu-items">
-        <div class="menu-item">
-            <div class="header-logo">
-                <a href="/">
-                    Главная
-                </a>
-            </div>
-        </div>
-        <div class="menu-item"><a href="/accounts" class="menu-item-title">Пользователи</a></div>
-        <div class="menu-item"><a href="#" class="menu-item-title">Логи</a></div>
-        <div class="menu-item"><a href="#" class="menu-item-title">Настройки</a></div>
-    </div>
+        <div class="col-5">
+            <form>
+                <div class="form-row">
 
-    <div class="user-menu">
-        Привет, <span class="user-name">admin</span>
-    </div>
-</div>
+                    <div class="form-group col-12">
+                        <label for="exampleInputEmail1">Поисковый запрос</label>
+                        <input type="email" class="form-control " id="exampleInputEmail1"
+                               aria-describedby="emailHelp" placeholder="Поисковый запрос">
+                        <small id="emailHelp" class="form-text text-muted">По этому запросу мы будем искать
+                            сайт в Яндексе
+                        </small>
+                    </div>
 
-<br><br><br><br>
 
-<div class="row">
-    <div class="col-2"></div>
-
-    <div class="col-5">
-        <form>
-            <div class="form-row">
-
-                <div class="form-group col-8">
-                    <label for="exampleInputEmail1">Поисковый запрос</label>
-                    <input type="email" class="form-control " id="exampleInputEmail1"
-                           aria-describedby="emailHelp" placeholder="Поисковый запрос">
-                    <small id="emailHelp" class="form-text text-muted">По этому запросу мы будем искать
-                        сайт в Яндексе
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputEmail1">Целевой сайт</label>
+                    <input type="email" class="form-control" id="exampleInputEmail1"
+                           aria-describedby="emailHelp" placeholder="Целевой сайт">
+                    <small id="emailHelp" class="form-text text-muted">На этом сайте мы будем проводить
+                        больше всего времени и выполнять целевые действия
                     </small>
                 </div>
-                <div class="form-group col-4">
-                    <label>Поисковая система</label>
-                    <select class="form-control ">
-                        <option>Яндекс</option>
-                        <option>Google</option>
-                    </select>
+                <div class="form-group">
+                    <label for="exampleInputEmail1">Сайты конкурентов</label>
+                    <textarea class="form-control" id="exampleInputEmail1"
+                              aria-describedby="emailHelp" placeholder="Сайты конкурентов"></textarea>
+                    <small id="emailHelp" class="form-text text-muted">Эти сайты мы будем быстро покидать</small>
                 </div>
-
+                <input type="button" value="Погнали!" class="btn btn-primary btn-block">
+            </form>
+        </div>
+        <div class="col-3">
+            <div class="form-group">
+                <label for="exampleInputEmail1">Список прокси</label>
+                <ul>
+                    {% if not proxies %}
+                        {{ "<li>У Вас пока нет прокси</li>"}}
+                    {% endif %}
+                    {% for proxy in proxies %}
+                        <li>{{ proxy.host }}:{{ proxy.port }}</li>
+                    {% endfor %}
+                </ul>
             </div>
             <div class="form-group">
-                <label for="exampleInputEmail1">Целевой сайт</label>
-                <input type="email" class="form-control" id="exampleInputEmail1"
-                       aria-describedby="emailHelp" placeholder="Целевой сайт">
-                <small id="emailHelp" class="form-text text-muted">На этом сайте мы будем проводить
-                    больше всего времени и выполнять целевые действия
-                </small>
-            </div>
-            <div class="form-group">
-                <label for="exampleInputEmail1">Сайты конкурентов</label>
-                <textarea class="form-control" id="exampleInputEmail1"
-                          aria-describedby="emailHelp" placeholder="Сайты конкурентов"></textarea>
-                <small id="emailHelp" class="form-text text-muted">На этом сайте мы будем проводить
-                    больше всего времени и выполнять целевые действия
-                </small>
-            </div>
+            <textarea class="form-control" id="proxy-input"
+                      aria-describedby="emailHelp" placeholder="Прокси в формате ip_address:port:username:password"
+                      rows="10"></textarea>
 
-            <input type="button" value="Погнали!" class="btn btn-primary btn-block">
+            </div>
+            <input type="button" value="Сохранить прокси" id="save-proxies" class="btn btn-primary btn-block">
+        </div>
 
-        </form>
-    </div>
-    <div class="col-3">
-        <label for="exampleInputEmail1">Список прокси</label>
-        <textarea class="form-control" id="exampleInputEmail1"
-                  aria-describedby="emailHelp" placeholder="Прокси в формате ip_address:port:username:password"
-                  rows="11"></textarea>
+        <div class="col-2"></div>
     </div>
 
-    <div class="col-2"></div>
-</div>
-
-</body>
-
-
-<script>
-    var roomName = {{ room_name_json }};
-
-    var chatSocket = new WebSocket(
-        'ws://' + window.location.host +
-        '/ws/chat/' + roomName + '/');
-
-    chatSocket.onmessage = function (e) {
-        var data = JSON.parse(e.data);
-        var message = data['message'];
-        document.querySelector('#chat-log').value += (message + '\n');
-    };
-
-    chatSocket.onclose = function (e) {
-        console.error('Chat socket closed unexpectedly');
-    };
-
-    document.querySelector('#chat-message-input').focus();
-    document.querySelector('#chat-message-input').onkeyup = function (e) {
-        if (e.keyCode === 13) {  // enter, return
-            document.querySelector('#chat-message-submit').click();
-        }
-    };
-
-    document.querySelector('#chat-message-submit').onclick = function (e) {
-        var messageInputDom = document.querySelector('#chat-message-input');
-        var message = messageInputDom.value;
-        chatSocket.send(JSON.stringify({
-            'message': message
-        }));
-
-        messageInputDom.value = '';
-    };
-</script>
-</html>
+    <script>
+        var user_id = {{request.user.id}};
+    </script>
+{% endblock %}
