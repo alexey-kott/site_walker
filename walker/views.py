@@ -5,12 +5,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.handlers.wsgi import WSGIRequest
 
 from walker.common_functions import send_email
-from walker.models import ProxyModel
+from walker.models import Proxy
 
 
 @login_required(login_url='/sign-in/')
 def index(request):
-    proxies = ProxyModel.objects.filter(owner=1)
+    proxies = Proxy.objects.filter(owner=request.user.id)
     return render(request, 'walker/index.html', {'proxies': proxies})
 
 
@@ -27,6 +27,9 @@ def sign_up(request: WSGIRequest):
             login(request, user)
             # send_email(email, username, raw_password)
             return redirect('/')
+        else:
+            print(form)
+            return render(request, 'walker/sign-up.html', {'form_error': form})
     else:
         form = UserCreationForm()
     return render(request, 'walker/sign-up.html', {'form': form})

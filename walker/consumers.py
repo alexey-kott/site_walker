@@ -1,7 +1,9 @@
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 import json
 
-from walker.common_functions import extract_proxies, save_proxy
+from django.contrib.auth.models import User
+
+from walker.common_functions import save_proxies
 
 
 class WalkerConsumer(AsyncWebsocketConsumer):
@@ -18,8 +20,8 @@ class WalkerConsumer(AsyncWebsocketConsumer):
         method = msg['method']
 
         if method == 'save_proxies':
-            proxies = await extract_proxies(msg['data'])
-            await save_proxy(proxies, msg['user_id'])
+            user = User.objects.get(pk=msg['user_id'])
+            proxies = await save_proxies(user=user, text_data=msg['data'])
 
         await self.send(text_data=json.dumps({
             'message': ''

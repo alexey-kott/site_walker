@@ -3,9 +3,9 @@ from django.contrib.auth.models import User
 from django.db.models import CASCADE
 
 
-class ProxyModel(models.Model):
+class Proxy(models.Model):
     owner = models.ForeignKey(User, on_delete=CASCADE)
-    proxy_id = models.IntegerField(primary_key=True)
+    proxy_id = models.IntegerField(primary_key=True, auto_created=True)
     host = models.TextField()
     port = models.IntegerField()
     username = models.TextField()
