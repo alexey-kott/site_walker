@@ -1,11 +1,13 @@
 
-.container-fluid{
+.container-fluid {
     padding: 0;
+    height: 95vh;
+    width: 93vw;
 }
 
-.btn-primary{
+.btn-primary {
     background-color: #4a76a8 !important;
-    border:1px solid #4872a3;
+    border: 1px solid #4872a3;
 }
 
 .header-menu {
@@ -21,11 +23,11 @@
     align-items: center;
 }
 
-.header-menu a{
+.header-menu a {
     color: #fff;
 }
 
-.login-form{
+.login-form {
     /*display: flex;*/
     /*flex-direction: column;*/
     /*justify-content: center;*/
@@ -55,4 +57,9 @@
 
 .menu-item img {
     height: 100%;
+}
+
+.task-label {
+    font-weight: bold;
+    font-size: 1.4em;
 }

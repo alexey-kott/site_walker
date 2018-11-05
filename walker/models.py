@@ -14,3 +14,14 @@ class Proxy(models.Model):
 
     class Meta:
         unique_together = ('owner', 'host', 'port', 'username')
+
+
+class Task(models.Model):
+    owner = models.ForeignKey(User, on_delete=CASCADE)
+    name = models.TextField(default='Task')
+    status = models.BooleanField(default=True)
+
+    search_query = models.TextField(null=True)
+    target_url = models.TextField(null=True)
+    competitor_sites = models.TextField(null=True)
+

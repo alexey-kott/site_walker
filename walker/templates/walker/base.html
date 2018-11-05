@@ -33,25 +33,27 @@
             </div>
             <div class="menu-item"><a href="#" class="menu-item-title">Пользователи</a></div>
             <div class="menu-item"><a href="#" class="menu-item-title">Логи</a></div>
-            <div class="menu-item"><a href="#" class="menu-item-title">Настройки</a></div>
+            <div class="menu-item"><a href="/settings/" class="menu-item-title">Настройки</a></div>
         {% endif %}
     </div>
 
     <div class="user-menu">
-        Привет, <span class="user-name">
-            <a href="/sign-out/">
+         <span class="user-name">
+
                 {% if request.user.is_authenticated %}
-                    {{ request.user.username }}
-                {% else %}
-                    анонимус
+                    {{ request.user.username }} (<a href="/sign-out/">выход</a>)
                 {% endif %}
-            </a>
         </span>
     </div>
 </div>
 <div class="container-fluid">
-
-    {% block content %}{% endblock %}
+    <div class="row mt-5 pt-5">
+        <div class="col-2"></div>
+        <div class="col-8">
+            {% block content %}{% endblock %}
+        </div>
+        <div class="col-2"></div>
+    </div>
 </div>
 
 <script src="{% static 'js/script.js' %}"></script>

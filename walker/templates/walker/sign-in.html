@@ -1,5 +1,5 @@
 {% extends 'walker/base.html' %}
-
+{% load crispy_forms_tags %}
 {% block title %}Sign in{% endblock %}
 
 {% block content %}
@@ -8,25 +8,7 @@
         <div class="col-4" style="height:100vh">
             <form method="POST" action="/sign-in/" class="login-form mt-5">
                 {% csrf_token %}
-                <div class="form-row">
-                    <div class="form-group col-12">
-                        <input type="text" class="form-control " id="login" name='login' placeholder="Логин">
-
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-12">
-                        <input type="password" class="form-control " id="password" name="password" placeholder="Пароль">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <a href="/sign-up/" class="mx-auto mb-2">
-                        Регистрация
-                    </a>
-                    <a href="/reset-password/"  class="mx-auto">
-                        Забыл пароль
-                    </a>
-                </div>
+                {{ form|crispy }}
                 <div class="form-row">
                     <input type="submit" value="Войти" class="btn btn-primary btn-block">
                 </div>
