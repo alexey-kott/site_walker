@@ -18,6 +18,6 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    url(r'^', include('walker.urls')),
+    url(r'^', include('walker_panel.urls')),
     path('admin/', admin.site.urls)
 ]

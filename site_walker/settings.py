@@ -32,8 +32,9 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'channels',
-    'walker',
+    'walker_panel',
     'crispy_forms',
+    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -58,7 +59,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            '/walker/templates/'
+            '/walker_panel/templates/'
         ],
         'APP_DIRS': True,
         'OPTIONS': {

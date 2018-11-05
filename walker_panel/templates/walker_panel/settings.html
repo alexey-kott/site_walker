@@ -1,0 +1,17 @@
+{% extends 'walker_panel/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-12">
+            <form method="post">
+                {% csrf_token %}
+                {{ proxy_form|crispy }}
+                <input type="submit" value="Сохранить" class="btn btn-primary btn-block">
+            </form>
+
+        </div>
+
+    </div>
+{% endblock %}
