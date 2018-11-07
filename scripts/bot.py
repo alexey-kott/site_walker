@@ -17,7 +17,9 @@ from walker_panel.models import Task, Proxy
 logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                     datefmt='%m-%d %H:%M',
-                    filename='./logs/err.log')
+                    filename='./logs/log')
+logger = logging.getLogger('site_walker')
+logger.setLevel(logging.INFO)
 
 SCREENSHOTS_DIR = './screenshots/'
 YANDEX_URL = 'https://yandex.ru'
@@ -64,34 +66,42 @@ class TaskRunner(Thread):
     def run(self):
         browser_configuration = generate_browser_configuration(self.task)
         driver = get_driver(browser_configuration)
-        print(browser_configuration)
-        # driver.get(YANDEX_URL)
-        driver.get('https://2ip.ru')
-        sleep(222)
+        driver.get(YANDEX_URL)
 
         driver.find_element_by_id('text').send_keys(self.task.search_query, Keys.ENTER)
-        driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
-        sleep(3)
+        # driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
+        sleep(2)
 
         result_items = driver.find_elements_by_class_name('serp-item')
 
         for item in result_items:
             links = item.find_elements_by_class_name('link_theme_outer')
+
             try:
                 link = links[0]
             except:
                 continue
 
             url = link.find_element_by_tag_name('b').get_attribute('innerText')
-            if self.task.target_url.find(url) != -1:
-                link.click()
 
+            link.click()
+            driver.switch_to.window(driver.window_handles[-1])
+            sleep(1)
+
+            logger.info(f'Visit: {url}')
+            if self.task.target_url.find(url) != -1:
+                #  заходим на целевой сайт
                 for i in range(5):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 700)});")
                     sleep(randint(3, 7))
-
                 sleep(60)
-                driver.close()
+            else:
+                #  заходим к конкурентам
+                for i in range(3):
+                    driver.execute_script(f"window.scrollTo(0, {randint(300, 800)});")
+                    sleep(randint(3, 4))
+
+            driver.switch_to.window(driver.window_handles[0])
 
         driver.close()
 
@@ -103,8 +113,8 @@ def get_driver(config: Dict) -> Chrome:
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
     options.add_argument(f"user-agent={config['user-agent']}")
-    options.add_argument("--window-position=1920,0")
-    # options.add_argument("--headless")
+    # options.add_argument("--window-position=1920,0")
+    options.add_argument("--headless")
 
     if config.get('proxy'):
         proxy = WebDriverProxy({
@@ -118,11 +128,10 @@ def get_driver(config: Dict) -> Chrome:
 
 
 def run():
-    threads = {}
-    for task in Task.objects.all():
-        competitor_sites = task.competitor_sites.split('\r\n')
+    while True:
+        threads = {}
+        for task in Task.objects.filter(status=True):
+            threads[task.id] = TaskRunner(task=task)
+            threads[task.id].start()
 
-        threads[task.id] = TaskRunner(task=task)
-        threads[task.id].start()
-
-        sleep(3)
+        sleep(300)
