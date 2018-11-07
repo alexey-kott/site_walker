@@ -2,22 +2,10 @@ import asyncio
 import smtplib
 from typing import List, Union, Dict
 
-import attr
 from aiohttp import ClientSession, BasicAuth
-import aiohttp
-from django.contrib.auth.models import User
 from django.db import IntegrityError
 
 from walker_panel.models import Proxy
-
-
-# @attr.s
-# class Proxy:
-#     host: str = attr.ib()
-#     port: int = attr.ib()
-#     username: str = attr.ib()
-#     password: str = attr.ib()
-#     enabled: bool = attr.ib(init=False, default=False)
 
 
 def send_email(email, user_login='', user_password=''):

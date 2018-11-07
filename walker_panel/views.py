@@ -59,6 +59,7 @@ def change_task_status(request: WSGIRequest, task_id: int):
     return redirect('/')
 
 
+@login_required(login_url='/sign-in/')
 def settings(request: WSGIRequest):
     if request.method == 'POST':
         proxy_field_text = request.POST['proxies']
@@ -83,7 +84,7 @@ def sign_up(request: WSGIRequest):
             # send_email(email, username, raw_password)
             return redirect('/')
         else:
-            return render(request, 'walker_panel/sign-up.html', {'form_error': form})
+            return render(request, 'walker_panel/sign-up.html', {'form': form})
     else:
         form = SignUpForm()
     return render(request, 'walker_panel/sign-up.html', {'form': form})

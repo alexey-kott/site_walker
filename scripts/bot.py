@@ -76,8 +76,9 @@ class TaskRunner(Thread):
                 continue
 
             url = link.find_element_by_tag_name('b').get_attribute('innerText')
-            print(url)
-            # print(link.get_property('outerHTML'))
+            if self.target_url.find(url) != -1:
+                link.click()
+                sleep(60)
 
 
 
@@ -91,7 +92,7 @@ def get_driver(config: Dict) -> Chrome:
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
     options.add_argument(f"user-agent={config['user-agent']}")
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
 
     return Chrome("./webdriver/chromedriver", options=options)
 
