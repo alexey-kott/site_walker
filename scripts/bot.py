@@ -12,7 +12,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.proxy import ProxyType, Proxy as WebDriverProxy
 from user_agent import generate_user_agent
 
-from walker_panel.models import Task, Proxy
+from walker_panel.models import Task, Proxy, User
 
 logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
@@ -64,6 +64,8 @@ class TaskRunner(Thread):
         self.task = task
 
     def run(self):
+        user = self.task.owner
+        logger.info(f"Task started. User: {user.username}, target site: {self.task.target_url}")
         browser_configuration = generate_browser_configuration(self.task)
         driver = get_driver(browser_configuration)
         driver.get(YANDEX_URL)
@@ -88,13 +90,14 @@ class TaskRunner(Thread):
             driver.switch_to.window(driver.window_handles[-1])
             sleep(1)
 
-            logger.info(f'Visit: {url}')
+            logger.info(f"Visit url: {url} User: {user.username}, target site: {self.task.target_url}")
             if self.task.target_url.find(url) != -1:
                 #  заходим на целевой сайт
                 for i in range(5):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 700)});")
                     sleep(randint(3, 7))
-                sleep(60)
+                break
+                # sleep(60)
             else:
                 #  заходим к конкурентам
                 for i in range(3):
@@ -131,7 +134,9 @@ def run():
     while True:
         threads = {}
         for task in Task.objects.filter(status=True):
+            print(task)
             threads[task.id] = TaskRunner(task=task)
             threads[task.id].start()
+            threads[task.id].join()
 
-        sleep(300)
+        sleep(10)
