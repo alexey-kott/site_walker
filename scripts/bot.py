@@ -14,14 +14,17 @@ from user_agent import generate_user_agent
 
 from walker_panel.models import Task, Proxy, User
 
+# APP_PATH = '/home/alexkott/Documents/YouDo/site_walker/'
+APP_PATH = '/home/user/site_walker/'
+
 logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                     datefmt='%m-%d %H:%M',
-                    filename='./logs/log')
+                    filename=APP_PATH+'logs/log')
 logger = logging.getLogger('site_walker')
 logger.setLevel(logging.INFO)
 
-SCREENSHOTS_DIR = './screenshots/'
+SCREENSHOTS_DIR = APP_PATH+'screenshots/'
 YANDEX_URL = 'https://yandex.ru'
 
 
@@ -93,16 +96,17 @@ class TaskRunner(Thread):
             logger.info(f"Visit url: {url} User: {user.username}, target site: {self.task.target_url}")
             if self.task.target_url.find(url) != -1:
                 #  заходим на целевой сайт
-                for i in range(5):
+                for i in range(10):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 700)});")
+                    driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
                     sleep(randint(3, 7))
+                sleep(30)
                 break
-                # sleep(60)
             else:
                 #  заходим к конкурентам
-                for i in range(3):
+                for i in range(2):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 800)});")
-                    sleep(randint(3, 4))
+                    sleep(randint(1,2))
 
             driver.switch_to.window(driver.window_handles[0])
 
@@ -126,17 +130,15 @@ def get_driver(config: Dict) -> Chrome:
         })
         proxy.add_to_capabilities(capabilities)
 
-    return Chrome("./webdriver/chromedriver", options=options,
+    return Chrome(APP_PATH+"webdriver/chromedriver", options=options,
                   desired_capabilities=capabilities)
 
 
 def run():
-    while True:
-        threads = {}
-        for task in Task.objects.filter(status=True):
-            print(task)
-            threads[task.id] = TaskRunner(task=task)
-            threads[task.id].start()
-            threads[task.id].join()
+    threads = {}
+    for task in Task.objects.filter(status=True):
+        print(task)
+        threads[task.id] = TaskRunner(task=task)
+        threads[task.id].start()
+        threads[task.id].join()
 
-        sleep(10)
