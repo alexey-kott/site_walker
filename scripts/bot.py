@@ -98,7 +98,7 @@ class TaskRunner(Thread):
                 #  заходим на целевой сайт
                 for i in range(10):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 700)});")
-                    driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
+                    #driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
                     sleep(randint(3, 7))
                 sleep(30)
                 break
