@@ -114,14 +114,15 @@ class TaskRunner(Thread):
 
             url = link.find_element_by_tag_name('b').get_attribute('innerText')
 
-            link.click()
-            driver.switch_to.window(driver.window_handles[-1])
             sleep(1)
 
             log(user, f"Task {self.task.id}, visit url: {url}, target site: {self.task.target_url}, task {self.task.id}")
 
             logger.info(f"Task {self.task.id}, visit url: {url} User: {user.username}, target site: {self.task.target_url}")
             if self.task.target_url.find(url) != -1:
+
+                link.click()
+                driver.switch_to.window(driver.window_handles[-1])
                 #  заходим на целевой сайт
                 for i in range(5):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 700)});")
@@ -129,18 +130,20 @@ class TaskRunner(Thread):
                     sleep(randint(12,24))
                 sleep(30)
 
+
+
                 break
             elif is_competitor_site(url, self.task.competitor_sites):
-                print('COMPETITOR:', url)
+
+                link.click()
+                driver.switch_to.window(driver.window_handles[-1])
                 #  заходим к конкурентам
                 for i in range(5):
-                    driver.execute_script(f"window.scrollTo(0, {randint(300, 800)});")
                     sleep(randint(3, 5))
-            else:
-                print('NOT COMPETITOR:', url)
+                    driver.execute_script(f"window.scrollTo(0, {randint(300, 800)});")
 
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
 
         driver.close()
 
