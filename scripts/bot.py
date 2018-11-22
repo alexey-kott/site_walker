@@ -119,7 +119,7 @@ class TaskRunner(Thread):
                     #driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
                     sleep(randint(12,24))
                 sleep(30)
-                
+
                 break
             else:
                 #  заходим к конкурентам
@@ -141,7 +141,7 @@ def get_driver(config: Dict) -> Chrome:
     options.add_argument("--no-sandbox")
     options.add_argument(f"user-agent={config['user-agent']}")
     # options.add_argument("--window-position=1920,0")
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
 
     if config.get('proxy'):
         proxy = WebDriverProxy({
