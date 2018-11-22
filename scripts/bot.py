@@ -73,6 +73,15 @@ def change_region(driver: Chrome, region: str):
     sleep(1)
 
 
+def is_competitor_site(url, competitor_sites):
+    competitor_urls = competitor_sites.split('\r\n')
+    for site in competitor_urls:
+        if site.find(url) != -1:
+            return True
+
+    return False
+
+
 class TaskRunner(Thread):
     def __init__(self, task: Task):
         Thread.__init__(self)
@@ -80,8 +89,8 @@ class TaskRunner(Thread):
 
     def run(self):
         user = self.task.owner
-        log(user, f'Task started. Target site: {self.task.target_url}')
-        logger.info(f"Task started. User: {user.username}, target site: {self.task.target_url}")
+        log(user, f'Task {self.task.id} started. Target site: {self.task.target_url}')
+        logger.info(f"Task {self.task.id} started. User: {user.username}, target site: {self.task.target_url}")
         browser_configuration = generate_browser_configuration(self.task)
         driver = get_driver(browser_configuration)
         driver.get(YANDEX_URL)
@@ -109,9 +118,9 @@ class TaskRunner(Thread):
             driver.switch_to.window(driver.window_handles[-1])
             sleep(1)
 
-            log(user, f"Visit url: {url}, target site: {self.task.target_url}")
+            log(user, f"Task {self.task.id}, visit url: {url}, target site: {self.task.target_url}, task {self.task.id}")
 
-            logger.info(f"Visit url: {url} User: {user.username}, target site: {self.task.target_url}")
+            logger.info(f"Task {self.task.id}, visit url: {url} User: {user.username}, target site: {self.task.target_url}")
             if self.task.target_url.find(url) != -1:
                 #  заходим на целевой сайт
                 for i in range(5):
@@ -121,11 +130,14 @@ class TaskRunner(Thread):
                 sleep(30)
 
                 break
-            else:
+            elif is_competitor_site(url, self.task.competitor_sites):
+                print('COMPETITOR:', url)
                 #  заходим к конкурентам
                 for i in range(5):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 800)});")
                     sleep(randint(3, 5))
+            else:
+                print('NOT COMPETITOR:', url)
 
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
