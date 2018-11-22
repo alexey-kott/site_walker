@@ -76,6 +76,8 @@ def change_region(driver: Chrome, region: str):
 def is_competitor_site(url, competitor_sites):
     competitor_urls = competitor_sites.split('\r\n')
     for site in competitor_urls:
+        site = site.replace('http://', '')
+        site = site.replace('https://', '')
         if site.find(url) != -1:
             return True
 
@@ -119,8 +121,8 @@ class TaskRunner(Thread):
             log(user, f"Task {self.task.id}, visit url: {url}, target site: {self.task.target_url}, task {self.task.id}")
 
             logger.info(f"Task {self.task.id}, visit url: {url} User: {user.username}, target site: {self.task.target_url}")
-            if self.task.target_url.find(url) != -1:
 
+            if self.task.target_url.find(url) != -1:
                 link.click()
                 driver.switch_to.window(driver.window_handles[-1])
                 #  заходим на целевой сайт
@@ -129,8 +131,6 @@ class TaskRunner(Thread):
                     #driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
                     sleep(randint(12,24))
                 sleep(30)
-
-
 
                 break
             elif is_competitor_site(url, self.task.competitor_sites):
