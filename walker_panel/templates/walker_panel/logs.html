@@ -1,0 +1,17 @@
+{% extends 'walker_panel/base.html' %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-12">
+            <pre class="pre-scrollable">
+                <code>
+                {% for log in logs %}
+                    {{ log.date }} {{ log.action }}
+                {% endfor %}
+                </code>
+            </pre>
+        </div>
+
+    </div>
+{% endblock %}

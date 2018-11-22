@@ -2,6 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import CASCADE
 
+from django.utils import timezone
+
+from datetime import datetime
+
 
 class Proxy(models.Model):
     owner = models.ForeignKey(User, on_delete=CASCADE)
@@ -16,6 +20,13 @@ class Proxy(models.Model):
         unique_together = ('owner', 'host', 'port', 'username')
 
 
+class City(models.Model):
+    name = models.CharField(max_length=30, unique=True, default='')
+
+    def __str__(self):
+        return self.name
+
+
 class Task(models.Model):
     owner = models.ForeignKey(User, on_delete=CASCADE)
     name = models.TextField(default='')
@@ -24,4 +35,10 @@ class Task(models.Model):
     search_query = models.TextField(null=True)
     target_url = models.TextField(null=True)
     competitor_sites = models.TextField(null=True)
+    region = models.ForeignKey(City, on_delete=CASCADE, default=None, null=True)
 
+
+class Log(models.Model):
+    owner = models.ForeignKey(User, on_delete=CASCADE)
+    action = models.TextField(null=True)
+    date = models.DateTimeField(default=timezone.now)

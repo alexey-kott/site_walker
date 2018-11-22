@@ -3,6 +3,7 @@ import random
 from random import randint, choice
 from time import sleep
 from threading import Thread
+from multiprocessing import Process
 from datetime import datetime
 from typing import List, Dict
 
@@ -12,19 +13,19 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.proxy import ProxyType, Proxy as WebDriverProxy
 from user_agent import generate_user_agent
 
-from walker_panel.models import Task, Proxy, User
+from walker_panel.models import Task, Proxy, User, Log
 
 # APP_PATH = '/home/alexkott/Documents/YouDo/site_walker/'
-APP_PATH = '/home/user/site_walker/'
+# APP_PATH = '/home/user/site_walker/'
 
 logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                     datefmt='%m-%d %H:%M',
-                    filename=APP_PATH+'logs/log')
+                    filename='./logs/log')
 logger = logging.getLogger('site_walker')
 logger.setLevel(logging.INFO)
 
-SCREENSHOTS_DIR = APP_PATH+'screenshots/'
+SCREENSHOTS_DIR = './screenshots/'
 YANDEX_URL = 'https://yandex.ru'
 
 
@@ -61,6 +62,17 @@ def generate_browser_configuration(task: Task) -> Dict[str, str]:
     return config
 
 
+def change_region(driver: Chrome, region: str):
+    driver.find_element_by_class_name('geolink').click()
+    sleep(1)
+    city_input = driver.find_element_by_id('city__front-input')
+    city_input.clear()
+    city_input.send_keys(region)
+    sleep(1)
+    city_input.send_keys(Keys.ENTER)
+    sleep(1)
+
+
 class TaskRunner(Thread):
     def __init__(self, task: Task):
         Thread.__init__(self)
@@ -68,10 +80,14 @@ class TaskRunner(Thread):
 
     def run(self):
         user = self.task.owner
+        log(user, f'Task started. Target site: {self.task.target_url}')
         logger.info(f"Task started. User: {user.username}, target site: {self.task.target_url}")
         browser_configuration = generate_browser_configuration(self.task)
         driver = get_driver(browser_configuration)
         driver.get(YANDEX_URL)
+
+        if self.task.region.name != '':
+            change_region(driver, self.task.region.name)
 
         driver.find_element_by_id('text').send_keys(self.task.search_query, Keys.ENTER)
         # driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
@@ -93,21 +109,25 @@ class TaskRunner(Thread):
             driver.switch_to.window(driver.window_handles[-1])
             sleep(1)
 
+            log(user, f"Visit url: {url}, target site: {self.task.target_url}")
+
             logger.info(f"Visit url: {url} User: {user.username}, target site: {self.task.target_url}")
             if self.task.target_url.find(url) != -1:
                 #  заходим на целевой сайт
-                for i in range(10):
+                for i in range(5):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 700)});")
                     #driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
-                    sleep(randint(3, 7))
+                    sleep(randint(12,24))
                 sleep(30)
+                
                 break
             else:
                 #  заходим к конкурентам
-                for i in range(2):
+                for i in range(5):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 800)});")
-                    sleep(randint(1,2))
+                    sleep(randint(3, 5))
 
+            driver.close()
             driver.switch_to.window(driver.window_handles[0])
 
         driver.close()
@@ -121,7 +141,7 @@ def get_driver(config: Dict) -> Chrome:
     options.add_argument("--no-sandbox")
     options.add_argument(f"user-agent={config['user-agent']}")
     # options.add_argument("--window-position=1920,0")
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
 
     if config.get('proxy'):
         proxy = WebDriverProxy({
@@ -130,8 +150,13 @@ def get_driver(config: Dict) -> Chrome:
         })
         proxy.add_to_capabilities(capabilities)
 
-    return Chrome(APP_PATH+"webdriver/chromedriver", options=options,
+    return Chrome("./webdriver/chromedriver", options=options,
                   desired_capabilities=capabilities)
+
+
+def log(user: User, action: str):
+    log_entry = Log(owner=user, action=action)
+    log_entry.save()
 
 
 def run():
@@ -139,6 +164,9 @@ def run():
     for task in Task.objects.filter(status=True):
         print(task)
         threads[task.id] = TaskRunner(task=task)
+        threads[task.id].daemon = True
         threads[task.id].start()
-        threads[task.id].join()
+
+    for task_id, task_runner in threads.items():
+        task_runner.join()
 

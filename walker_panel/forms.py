@@ -1,8 +1,8 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django.forms import Form, EmailField, CharField, Textarea, ModelForm, URLField, HiddenInput, IntegerField
+from django.forms import Form, EmailField, CharField, Textarea, ModelForm, URLField, HiddenInput, IntegerField, Select, ModelChoiceField
 
-from walker_panel.models import Task
+from walker_panel.models import Task, City
 
 
 class SignUpForm(UserCreationForm):
@@ -23,10 +23,11 @@ class TaskForm(ModelForm):
                                     f'и выполнять целевые действия')
     competitor_sites = CharField(label="Сайты конкурентов (в столбик)", widget=Textarea(attrs={}),
                                  help_text='*эти сайты мы будем быстро покидать')
+    region = ModelChoiceField(queryset=City.objects.all(), empty_label='', label='Указать регион', initial='')
 
     class Meta:
         model = Task
-        fields = ['name', 'id', 'search_query', 'target_url', 'competitor_sites']
+        fields = ['name', 'id', 'search_query', 'target_url', 'competitor_sites', 'region']
 
 
 class ProxyForm(Form):
