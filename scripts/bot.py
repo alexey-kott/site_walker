@@ -3,20 +3,14 @@ import random
 from random import randint, choice
 from time import sleep
 from threading import Thread
-from multiprocessing import Process
-from datetime import datetime
-from typing import List, Dict
+from typing import Dict
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver import Chrome, ChromeOptions, DesiredCapabilities
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.proxy import ProxyType, Proxy as WebDriverProxy
 from user_agent import generate_user_agent
 
 from walker_panel.models import Task, Proxy, User, Log
-
-# APP_PATH = '/home/alexkott/Documents/YouDo/site_walker/'
-# APP_PATH = '/home/user/site_walker/'
 
 logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
@@ -118,13 +112,14 @@ class TaskRunner(Thread):
 
             sleep(1)
 
-            log(user, f"Task {self.task.id}, visit url: {url}, target site: {self.task.target_url}, task {self.task.id}")
-
-            logger.info(f"Task {self.task.id}, visit url: {url} User: {user.username}, target site: {self.task.target_url}")
-
             if self.task.target_url.find(url) != -1:
                 link.click()
                 driver.switch_to.window(driver.window_handles[-1])
+
+                log(user,
+                    f"Task {self.task.id}, visit url: {url}, target site: {self.task.target_url}, task {self.task.id}")
+                logger.info(
+                    f"Task {self.task.id}, visit url: {url} User: {user.username}, target site: {self.task.target_url}")
                 #  заходим на целевой сайт
                 for i in range(5):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 700)});")
@@ -134,6 +129,11 @@ class TaskRunner(Thread):
 
                 break
             elif is_competitor_site(url, self.task.competitor_sites):
+
+                log(user,
+                    f"Task {self.task.id}, visit url: {url}, target site: {self.task.target_url}, task {self.task.id}")
+                logger.info(
+                    f"Task {self.task.id}, visit url: {url} User: {user.username}, target site: {self.task.target_url}")
 
                 link.click()
                 driver.switch_to.window(driver.window_handles[-1])
@@ -155,7 +155,6 @@ def get_driver(config: Dict) -> Chrome:
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
     options.add_argument(f"user-agent={config['user-agent']}")
-    # options.add_argument("--window-position=1920,0")
     options.add_argument("--headless")
 
     if config.get('proxy'):
