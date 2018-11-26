@@ -36,6 +36,8 @@ class Task(models.Model):
     target_url = models.TextField(null=True)
     competitor_sites = models.TextField(null=True)
     region = models.ForeignKey(City, on_delete=CASCADE, default=None, null=True)
+    last_start = models.DateTimeField(default=timezone.now, null=True)
+    delay = models.IntegerField(null=True)
 
 
 class Log(models.Model):

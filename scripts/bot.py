@@ -4,11 +4,13 @@ from random import randint, choice
 from time import sleep
 from threading import Thread
 from typing import Dict
+from datetime import datetime, timedelta
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver import Chrome, ChromeOptions, DesiredCapabilities
 from selenium.webdriver.common.proxy import ProxyType, Proxy as WebDriverProxy
 from user_agent import generate_user_agent
+from django.utils import timezone
 
 from walker_panel.models import Task, Proxy, User, Log
 
@@ -84,6 +86,14 @@ class TaskRunner(Thread):
         self.task = task
 
     def run(self):
+
+        if self.task.delay:
+            # если с последнего запуска прошло меньше, чем delay минут
+            if timezone.now() - timedelta(minutes=self.task.delay) < self.task.last_start:
+                return
+        self.task.last_start = timezone.now()
+        self.task.save()
+
         user = self.task.owner
         log(user, f'Task {self.task.id} started. Target site: {self.task.target_url}')
         logger.info(f"Task {self.task.id} started. User: {user.username}, target site: {self.task.target_url}")
@@ -176,11 +186,12 @@ def log(user: User, action: str):
 def run():
     threads = {}
     for task in Task.objects.filter(status=True):
-        print(task)
         threads[task.id] = TaskRunner(task=task)
         threads[task.id].daemon = True
         threads[task.id].start()
 
     for task_id, task_runner in threads.items():
         task_runner.join()
+
+    sleep(5)
 
