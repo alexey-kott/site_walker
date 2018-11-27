@@ -15,9 +15,12 @@ def get_driver() -> Chrome:
     return Chrome("./webdriver/chromedriver", options=options)
 
 
+from random import randint
+
 def get_curves():
     # curve base
-    points = [[0, 0], [0, 2], [2, 3], [4, 0], [6, 3], [8, 2], [8, 0]];  # curve base
+    # points = [[0, 0], [24, 12], [14, 13], [11, 1], ]  # curve base
+    points = [[randint(0, 100), randint(0, 100)] for i in range(20)]
     points = np.array(points)
 
     x = points[:, 0]
@@ -44,21 +47,25 @@ def get_curves():
 
 
 def run():
+
     driver = get_driver()
     url = "https://codepen.io/falldowngoboone/pen/PwzPYv"
+    url = "https://codepen.io/falldowngoboone/full/PwzPYv/"
     driver.get(url)
 
     x_i, y_i = get_curves()
 
     action = ActionChains(driver)
-
-    startElement = driver.find_element_by_id('drawer')
+    startElement = driver.find_element_by_id('result-iframe-wrap')
     # First, go to your start point or Element
     action.move_to_element(startElement)
     action.perform()
 
-    for mouse_x, mouse_y in zip(x_i, y_i):
-        action.move_by_offset(mouse_x, mouse_y);
-        action.perform();
+    for mouse_x, mouse_y in sorted(zip(x_i, y_i), reverse=True):
+        action.move_by_offset(mouse_x, mouse_y)
+        action.perform()
         sleep(0.1)
         print(mouse_x, mouse_y)
+        # sleep(1)
+
+

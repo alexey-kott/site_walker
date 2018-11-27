@@ -45,6 +45,17 @@ def get_random_screen_resolution() -> str:
     return random.choice(resolutions)
 
 
+def do_delay(delay: str = 'normal'):
+    if delay == 'fast':
+        sleep(randint(1, 5))
+    elif delay == 'normal':
+        sleep(randint(5, 15))
+    elif delay == 'slow':
+        sleep(randint(15, 30))
+    else:
+        sleep(randint(1, 30))
+
+
 def generate_browser_configuration(task: Task) -> Dict[str, str]:
     config = {'user-agent': generate_user_agent(),
               'resolution': get_random_screen_resolution()}
@@ -102,11 +113,23 @@ def walk_on_site(driver: Chrome):
         link = choice(links)
         action.move_to_element(link)
         action.perform()
-        sleep(randint(5, 10))
+        do_delay('fast')
         link.click()
         sleep(1)
         driver.find_element_by_tag_name('body').send_keys(Keys.ESCAPE)
-        sleep(randint(3, 7))
+        do_delay('fast')
+
+        for i in range(randint(1, 4)):
+            random_div = choice(driver.find_elements_by_tag_name('div'))
+            action.move_to_element(random_div)
+            try:
+                action.perform()
+                do_delay('fast')
+            except:
+                pass
+            driver.execute_script(f"window.scrollTo(0, {randint(1, 500)});")
+        sleep(1)
+
 
 
 class TaskRunner(Thread):
