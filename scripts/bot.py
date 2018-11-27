@@ -95,16 +95,18 @@ def is_competitor_site(url, competitor_sites):
 
 
 def walk_on_site(driver: Chrome):
-    for i in range(randint(3, 5)):
+    for i in range(randint(5, 15)):
         links = driver.find_elements_by_tag_name('a')
 
         action = ActionChains(driver)
         link = choice(links)
         action.move_to_element(link)
         action.perform()
-        sleep(randint(5, 15))
+        sleep(randint(5, 10))
         link.click()
-        sleep(randint(5, 15))
+        sleep(1)
+        driver.find_element_by_tag_name('body').send_keys(Keys.ESCAPE)
+        sleep(randint(3, 7))
 
 
 class TaskRunner(Thread):
@@ -165,8 +167,6 @@ class TaskRunner(Thread):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 700)});")
                     # driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
                     sleep(randint(12, 24))
-
-
 
                 sleep(randint(3*60, 6*60))
 
