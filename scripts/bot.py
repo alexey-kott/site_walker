@@ -113,7 +113,7 @@ class TaskRunner(Thread):
         self.task = task
 
     def run(self):
-        # sleep(randint(2*60, 20*60))
+        sleep(randint(2*60, 20*60))
         if self.task.last_start is None:
             self.task.last_start = datetime(1970, 1, 1)
             self.task.save()
