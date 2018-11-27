@@ -36,9 +36,14 @@
         {% endif %}
     </div>
 
+    {% if request.user.is_authenticated %}
+        {% if not is_walker_enable %}
+            <h3 style="color: red;">Walker is disabled</h3>
+        {% endif %}
+    {% endif %}
+
     <div class="user-menu">
          <span class="user-name">
-
                 {% if request.user.is_authenticated %}
                     {{ request.user.username }} (<a href="/sign-out/">выход</a>)
                 {% endif %}

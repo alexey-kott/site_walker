@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.handlers.wsgi import WSGIRequest
 
-from walker_panel.common_functions import send_email, save_proxies
+from walker_panel.common_functions import send_email, save_proxies, is_service_running
 from walker_panel.forms import SignUpForm, TaskForm, ProxyForm
 from walker_panel.models import Proxy, Task, Log
 
@@ -15,7 +15,8 @@ from walker_panel.models import Proxy, Task, Log
 @login_required(login_url='/sign-in/')
 def index(request: WSGIRequest):
     tasks = Task.objects.filter(owner=request.user.id)
-    return render(request, 'walker_panel/index.html', {'tasks': tasks})
+    return render(request, 'walker_panel/index.html',
+                  {'tasks': tasks, 'is_walker_enable': is_service_running('walker')})
 
 
 @login_required(login_url='/sign-in/')
@@ -34,12 +35,15 @@ def task_page(request: WSGIRequest, task_id: Optional[int] = None):
                 form = TaskForm(request.POST or None, instance=instance)
                 form.save()
             return redirect('/')
-        return render(request, 'walker_panel/task.html', {'form': form})
+        return render(request, 'walker_panel/task.html',
+                      {'form': form, 'is_walker_enable': is_service_running('walker')})
     else:
         if task_id:
             task = Task.objects.get(pk=task_id)
-            return render(request, 'walker_panel/task.html', {'form': TaskForm(instance=task)})
-        return render(request, 'walker_panel/task.html', {'form': TaskForm()})
+            return render(request, 'walker_panel/task.html',
+                          {'form': TaskForm(instance=task), 'is_walker_enable': is_service_running('walker')})
+        return render(request, 'walker_panel/task.html',
+                      {'form': TaskForm(), 'is_walker_enable': is_service_running('walker')})
 
 
 @login_required(login_url='/sign-in/')
@@ -63,7 +67,7 @@ def change_task_status(request: WSGIRequest, task_id: int):
 def logs(request: WSGIRequest):
     logs = Log.objects.filter(owner=request.user).order_by('-date')[:1000]
 
-    return render(request, 'walker_panel/logs.html', {'logs': logs})
+    return render(request, 'walker_panel/logs.html', {'logs': logs, 'is_walker_enable': is_service_running('walker')})
 
 
 @login_required(login_url='/sign-in/')
@@ -76,7 +80,8 @@ def settings(request: WSGIRequest):
     proxies = Proxy.objects.filter(owner=request.user)
     proxy_list = [f"{p.host}:{p.port}:{p.username}:{p.password}" for p in proxies]
     proxy_form = ProxyForm(initial={'proxies': '\n'.join(proxy_list)})
-    return render(request, 'walker_panel/settings.html', {'proxy_form': proxy_form})
+    return render(request, 'walker_panel/settings.html',
+                  {'proxy_form': proxy_form, 'is_walker_enable': is_service_running('walker')})
 
 
 def sign_up(request: WSGIRequest):

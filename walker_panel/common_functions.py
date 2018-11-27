@@ -1,3 +1,5 @@
+import os
+import subprocess
 import asyncio
 import smtplib
 from typing import List, Union, Dict
@@ -68,3 +70,9 @@ async def save_proxies(user, text_data) -> List[Proxy]:
 
 
     return proxies
+
+
+def is_service_running(name):
+    with open(os.devnull, 'wb') as hide_output:
+        exit_code = subprocess.Popen(['service', name, 'status'], stdout=hide_output, stderr=hide_output).wait()
+        return exit_code == 0

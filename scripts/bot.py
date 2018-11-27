@@ -1,11 +1,13 @@
 import logging
 import random
+import re
 from random import randint, choice
 from time import sleep
 from threading import Thread
 from typing import Dict
 from datetime import datetime, timedelta
 
+from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver import Chrome, ChromeOptions, DesiredCapabilities
 from selenium.webdriver.common.proxy import ProxyType, Proxy as WebDriverProxy
@@ -69,15 +71,40 @@ def change_region(driver: Chrome, region: str):
     sleep(1)
 
 
+def trunc_url(url: str) -> str:
+    url = re.sub(r'https?://', '', url)
+    url = url.replace('www.', '')
+
+    return re.sub(r'/.*', '', url)
+
+
+def is_same_site(url1: str, url2: str) -> bool:
+    url1 = trunc_url(url1)
+    url2 = trunc_url(url2)
+
+    return url1 == url2
+
+
 def is_competitor_site(url, competitor_sites):
     competitor_urls = competitor_sites.split('\r\n')
     for site in competitor_urls:
-        site = site.replace('http://', '')
-        site = site.replace('https://', '')
-        if site.find(url) != -1:
+        if is_same_site(url, site):
             return True
 
     return False
+
+
+def walk_on_site(driver: Chrome):
+    for i in range(randint(3, 5)):
+        links = driver.find_elements_by_tag_name('a')
+
+        action = ActionChains(driver)
+        link = choice(links)
+        action.move_to_element(link)
+        action.perform()
+        sleep(randint(5, 15))
+        link.click()
+        sleep(randint(5, 15))
 
 
 class TaskRunner(Thread):
@@ -86,7 +113,10 @@ class TaskRunner(Thread):
         self.task = task
 
     def run(self):
-
+        # sleep(randint(2*60, 20*60))
+        if self.task.last_start is None:
+            self.task.last_start = datetime(1970, 1, 1)
+            self.task.save()
         if self.task.delay:
             # если с последнего запуска прошло меньше, чем delay минут
             if timezone.now() - timedelta(minutes=self.task.delay) < self.task.last_start:
@@ -96,7 +126,6 @@ class TaskRunner(Thread):
 
         user = self.task.owner
         log(user, f'Task {self.task.id} started. Target site: {self.task.target_url}')
-        logger.info(f"Task {self.task.id} started. User: {user.username}, target site: {self.task.target_url}")
         browser_configuration = generate_browser_configuration(self.task)
         driver = get_driver(browser_configuration)
         driver.get(YANDEX_URL)
@@ -111,39 +140,40 @@ class TaskRunner(Thread):
         result_items = driver.find_elements_by_class_name('serp-item')
 
         for item in result_items:
+            hyperlink = item.find_element_by_tag_name('h2')
             links = item.find_elements_by_class_name('link_theme_outer')
 
             try:
                 link = links[0]
+                url = link.get_attribute('href')
             except:
                 continue
 
-            url = link.find_element_by_tag_name('b').get_attribute('innerText')
-
             sleep(1)
 
-            if self.task.target_url.find(url) != -1:
-                link.click()
+            if is_same_site(self.task.target_url, url):
+                hyperlink.find_element_by_tag_name('a').click()
+
                 driver.switch_to.window(driver.window_handles[-1])
+
+                walk_on_site(driver)
 
                 log(user,
                     f"Task {self.task.id}, visit url: {url}, target site: {self.task.target_url}, task {self.task.id}")
-                logger.info(
-                    f"Task {self.task.id}, visit url: {url} User: {user.username}, target site: {self.task.target_url}")
                 #  заходим на целевой сайт
                 for i in range(5):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 700)});")
-                    #driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
-                    sleep(randint(12,24))
-                sleep(30)
+                    # driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
+                    sleep(randint(12, 24))
+
+
+
+                sleep(randint(3*60, 6*60))
 
                 break
             elif is_competitor_site(url, self.task.competitor_sites):
-
                 log(user,
                     f"Task {self.task.id}, visit url: {url}, target site: {self.task.target_url}, task {self.task.id}")
-                logger.info(
-                    f"Task {self.task.id}, visit url: {url} User: {user.username}, target site: {self.task.target_url}")
 
                 link.click()
                 driver.switch_to.window(driver.window_handles[-1])
@@ -178,9 +208,11 @@ def get_driver(config: Dict) -> Chrome:
                   desired_capabilities=capabilities)
 
 
-def log(user: User, action: str):
+def log(user: User, action: str, level='info'):
     log_entry = Log(owner=user, action=action)
     log_entry.save()
+
+    logger.info(action)
 
 
 def run():
@@ -194,4 +226,3 @@ def run():
         task_runner.join()
 
     sleep(5)
-
