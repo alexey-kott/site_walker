@@ -131,7 +131,6 @@ def walk_on_site(driver: Chrome):
         sleep(1)
 
 
-
 class TaskRunner(Thread):
     def __init__(self, task: Task):
         Thread.__init__(self)
@@ -139,6 +138,11 @@ class TaskRunner(Thread):
 
     def run(self):
         sleep(randint(2*60, 20*60))
+
+        task_launch_counter = Log.objects.filter(task=self.task).count()
+        if self.task.launches_per_day <= task_launch_counter:
+            return
+
         if self.task.last_start is None:
             self.task.last_start = datetime(1970, 1, 1)
             self.task.save()
@@ -150,7 +154,7 @@ class TaskRunner(Thread):
         self.task.save()
 
         user = self.task.owner
-        log(user, f'Task {self.task.id} started. Target site: {self.task.target_url}')
+        log(user=user, task=self.task, action=f'Task {self.task.id} started. Target site: {self.task.target_url}')
         browser_configuration = generate_browser_configuration(self.task)
         driver = get_driver(browser_configuration)
         driver.get(YANDEX_URL)
@@ -183,8 +187,8 @@ class TaskRunner(Thread):
 
                 walk_on_site(driver)
 
-                log(user,
-                    f"Task {self.task.id}, visit url: {url}, target site: {self.task.target_url}, task {self.task.id}")
+                log(user=user, task=self.task,
+                    action=f"Visit url: {url}, target site: {self.task.target_url}, task {self.task.id}")
                 #  заходим на целевой сайт
                 for i in range(5):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 700)});")
@@ -195,8 +199,8 @@ class TaskRunner(Thread):
 
                 break
             elif is_competitor_site(url, self.task.competitor_sites):
-                log(user,
-                    f"Task {self.task.id}, visit url: {url}, target site: {self.task.target_url}, task {self.task.id}")
+                log(user=user, task=self.task,
+                    action=f"Visit url: {url}, target site: {self.task.target_url}, task {self.task.id}")
 
                 link.click()
                 driver.switch_to.window(driver.window_handles[-1])
@@ -231,8 +235,8 @@ def get_driver(config: Dict) -> Chrome:
                   desired_capabilities=capabilities)
 
 
-def log(user: User, action: str, level='info'):
-    log_entry = Log(owner=user, action=action)
+def log(user: User, task: Task, action: str, level='info'):
+    log_entry = Log(owner=user, task=task, action=action)
     log_entry.save()
 
     logger.info(action)

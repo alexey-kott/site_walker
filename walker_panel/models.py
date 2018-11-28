@@ -38,9 +38,11 @@ class Task(models.Model):
     region = models.ForeignKey(City, on_delete=CASCADE, default=None, null=True)
     last_start = models.DateTimeField(default=timezone.now, null=True)
     delay = models.IntegerField(null=True)
+    launches_per_day = models.IntegerField(default=0)
 
 
 class Log(models.Model):
     owner = models.ForeignKey(User, on_delete=CASCADE)
     action = models.TextField(null=True)
+    task = models.ForeignKey(Task, on_delete=CASCADE, null=True)
     date = models.DateTimeField(default=timezone.now)

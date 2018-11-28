@@ -13,6 +13,10 @@
                 {% for task in tasks %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <a href="/task/{{ task.id }}/" class="btn btn-primary">Задача {{ task.id }}</a>
+                        <div style="width: 40%;">
+                            <span><b>Запрос:</b> {{ task.search_query }}</span><br>
+                            <span><b>URL:</b> <a href="{{ task.target_url }}">{{ task.target_url }}</a></span>
+                        </div>
                         <a href="/change-task-status/{{ task.id }}/"
                            title="{{ task.status|yesno:'Выключить, Включить' }}">
                             <span class="badge {{ task.status|yesno:'badge-success,badge-danger' }} badge-pill">·</span>

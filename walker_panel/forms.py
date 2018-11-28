@@ -25,10 +25,12 @@ class TaskForm(ModelForm):
                                  help_text='*эти сайты мы будем быстро покидать')
     region = ModelChoiceField(queryset=City.objects.all(), empty_label='', label='Указать регион', initial='')
     delay = IntegerField(label='Задержка', help_text='Запускать не чаще, чем раз в n минут')
+    launches_per_day = IntegerField(label='Количество запусков в день',
+                                    help_text='Максимальное количество запусков в день (0 — без ограничений)')
 
     class Meta:
         model = Task
-        fields = ['name', 'id', 'search_query', 'target_url', 'competitor_sites', 'region', 'delay']
+        fields = ['name', 'id', 'search_query', 'target_url', 'competitor_sites', 'region', 'delay', 'launches_per_day']
 
 
 class ProxyForm(Form):
