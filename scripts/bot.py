@@ -154,7 +154,7 @@ class TaskRunner(Thread):
         self.task.save()
 
         user = self.task.owner
-        log(user=user, task=self.task, action=f'Task {self.task.id} started. Target site: {self.task.target_url}')
+        log(user=user, task=self.task, action=f'Task started. Target site: {self.task.target_url}')
         browser_configuration = generate_browser_configuration(self.task)
         driver = get_driver(browser_configuration)
         driver.get(YANDEX_URL)
@@ -181,14 +181,17 @@ class TaskRunner(Thread):
             sleep(1)
 
             if is_same_site(self.task.target_url, url):
-                hyperlink.find_element_by_tag_name('a').click()
+                try:
+                    hyperlink.find_element_by_tag_name('a').click()
+                except Exception as e:
+                    print(e)
 
                 driver.switch_to.window(driver.window_handles[-1])
 
                 walk_on_site(driver)
 
                 log(user=user, task=self.task,
-                    action=f"Visit url: {url}, target site: {self.task.target_url}, task {self.task.id}")
+                    action=f"Visit url: {url}, target site: {self.task.target_url}")
                 #  заходим на целевой сайт
                 for i in range(5):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 700)});")
@@ -200,7 +203,7 @@ class TaskRunner(Thread):
                 break
             elif is_competitor_site(url, self.task.competitor_sites):
                 log(user=user, task=self.task,
-                    action=f"Visit url: {url}, target site: {self.task.target_url}, task {self.task.id}")
+                    action=f"Visit url: {url}, target site: {self.task.target_url}")
 
                 link.click()
                 driver.switch_to.window(driver.window_handles[-1])

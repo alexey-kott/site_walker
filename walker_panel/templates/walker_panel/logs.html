@@ -7,7 +7,7 @@
             <pre class="pre-scrollable">
                 <code>
                 {% for log in logs %}
-                    {{ log.date }} Task {{ log.task }} {{ log.action }}
+                    {{ log.date }} Task {{ log.task.id }} {{ log.action }}
                 {% endfor %}
                 </code>
             </pre>
