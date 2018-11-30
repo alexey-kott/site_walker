@@ -65,7 +65,7 @@ def change_task_status(request: WSGIRequest, task_id: int):
 
 @login_required(login_url='/sign-in/')
 def logs(request: WSGIRequest):
-    logs = Log.objects.filter(owner=request.user).order_by('-date')[:1000]
+    logs = Log.objects.filter(owner=request.user).order_by('-datetime')[:1000]
 
     return render(request, 'walker_panel/logs.html', {'logs': logs, 'is_walker_enable': is_service_running('walker')})
 

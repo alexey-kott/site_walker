@@ -1,6 +1,8 @@
+import json
 import logging
 import random
 import re
+from uuid import uuid4, UUID
 from random import randint, choice
 from time import sleep
 from threading import Thread
@@ -138,11 +140,12 @@ class TaskRunner(Thread):
     def __init__(self, task: Task):
         Thread.__init__(self)
         self.task = task
+        self.uid = uuid4()
 
     def run(self):
         sleep(randint(2*60, 20*60))
-        task_launch_counter = Log.objects.filter(task=self.task).count()
-        if self.task.launches_per_day <= task_launch_counter:
+
+        if 0 <= self.task.launches_per_day <= self.task.launches_today:  # 0 - there's no launch limits
             return
 
         if self.task.last_start is None:
@@ -156,7 +159,7 @@ class TaskRunner(Thread):
         self.task.save()
 
         user = self.task.owner
-        log(user=user, task=self.task, action=f'Task started. Target site: {self.task.target_url}')
+        log(user=user, task=self.task, action='LAUNCH', uid=self.uid)
         browser_configuration = generate_browser_configuration(self.task)
         driver = get_driver(browser_configuration)
         driver.get(YANDEX_URL)
@@ -194,20 +197,18 @@ class TaskRunner(Thread):
 
                 walk_on_site(driver)
 
-                log(user=user, task=self.task,
-                    action=f"Visit url: {url}, target site: {self.task.target_url}")
+                log(user=user, task=self.task, action='VISIT', extra={'visit_url': url}, uid=self.uid)
                 #  заходим на целевой сайт
                 for i in range(5):
                     driver.execute_script(f"window.scrollTo(0, {randint(300, 700)});")
                     # driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
                     sleep(randint(12, 24))
 
-                sleep(randint(3*60, 6*60))
+                sleep(randint(3 * 60, 6 * 60))
 
                 break
             elif is_competitor_site(url, self.task.competitor_sites):
-                log(user=user, task=self.task,
-                    action=f"Visit url: {url}, target site: {self.task.target_url}")
+                log(user=user, task=self.task, action='VISIT', extra={'visit_url': url}, uid=self.uid)
 
                 link.click()
                 driver.switch_to.window(driver.window_handles[-1])
@@ -220,6 +221,7 @@ class TaskRunner(Thread):
                 driver.switch_to.window(driver.window_handles[0])
 
         driver.close()
+        log(user=user, task=self.task, action='FINISH', uid=self.uid)
 
 
 def get_driver(config: Dict) -> Chrome:
@@ -242,8 +244,8 @@ def get_driver(config: Dict) -> Chrome:
                   desired_capabilities=capabilities)
 
 
-def log(user: User, task: Task, action: str, level='info'):
-    log_entry = Log(owner=user, task=task, action=action)
+def log(user: User, task: Task, action: str, level: str = 'info', extra: dict = None, uid: UUID = None):
+    log_entry = Log(owner=user, task=task, action=action, extra=json.dumps(extra), level=level, uid=uid)
     log_entry.save()
 
     logger.info(action)

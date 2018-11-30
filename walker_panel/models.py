@@ -4,7 +4,7 @@ from django.db.models import CASCADE
 
 from django.utils import timezone
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class Proxy(models.Model):
@@ -37,12 +37,22 @@ class Task(models.Model):
     competitor_sites = models.TextField(null=True)
     region = models.ForeignKey(City, on_delete=CASCADE, default=None, null=True)
     last_start = models.DateTimeField(default=timezone.now, null=True)
-    delay = models.IntegerField(null=True)
+    delay = models.IntegerField(default=0)
     launches_per_day = models.IntegerField(default=0)
+
+    @property
+    def launches_today(self):
+        return Log.objects \
+            .filter(action='LAUNCH') \
+            .filter(task=self).filter(datetime__gt=timezone.now().date()) \
+            .filter(datetime__lte=timezone.now().date() + timedelta(days=1)).count()
 
 
 class Log(models.Model):
     owner = models.ForeignKey(User, on_delete=CASCADE)
     action = models.TextField(null=True)
     task = models.ForeignKey(Task, on_delete=CASCADE, null=True)
-    date = models.DateTimeField(default=timezone.now)
+    datetime = models.DateTimeField(default=timezone.now)
+    level = models.TextField(default='INFO')
+    extra = models.TextField(null=True, default='')
+    uid = models.TextField()

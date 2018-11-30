@@ -17,6 +17,10 @@
                             <span><b>Запрос:</b> {{ task.search_query }}</span><br>
                             <span><b>URL:</b> <a href="{{ task.target_url }}">{{ task.target_url }}</a></span>
                         </div>
+                        <div style="width: 30%;">
+                            <span><b>Мин. задержка:</b> {{ task.delay }} мин</span><br>
+                            <span><b>Запусков из запланированных:</b> {{ task.launches_today }}/{{ task.launches_per_day }}</span>
+                        </div>
                         <a href="/change-task-status/{{ task.id }}/"
                            title="{{ task.status|yesno:'Выключить, Включить' }}">
                             <span class="badge {{ task.status|yesno:'badge-success,badge-danger' }} badge-pill">·</span>

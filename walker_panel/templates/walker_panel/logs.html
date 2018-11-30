@@ -7,7 +7,7 @@
             <pre class="pre-scrollable">
                 <code>
                 {% for log in logs %}
-                    {{ log.date }} Task {{ log.task.id }} {{ log.action }}
+                    {{ log.datetime }} <a href="/task/{{ log.task.id }}/">Task {{ log.task.id }}</a> {{ log.action }} {{ log.extra|default_if_none:'' }}
                 {% endfor %}
                 </code>
             </pre>
