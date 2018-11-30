@@ -107,28 +107,31 @@ def is_competitor_site(url, competitor_sites):
 
 def walk_on_site(driver: Chrome):
     for i in range(randint(5, 15)):
-        links = driver.find_elements_by_tag_name('a')
+        try:
+            links = driver.find_elements_by_tag_name('a')
 
-        action = ActionChains(driver)
-        link = choice(links)
-        action.move_to_element(link)
-        action.perform()
-        do_delay('fast')
-        link.click()
-        sleep(1)
-        driver.find_element_by_tag_name('body').send_keys(Keys.ESCAPE)
-        do_delay('fast')
+            action = ActionChains(driver)
+            link = choice(links)
+            action.move_to_element(link)
+            action.perform()
+            do_delay('fast')
+            link.click()
+            sleep(1)
+            driver.find_element_by_tag_name('body').send_keys(Keys.ESCAPE)
+            do_delay('fast')
 
-        for i in range(randint(1, 4)):
-            random_div = choice(driver.find_elements_by_tag_name('div'))
-            action.move_to_element(random_div)
-            try:
-                action.perform()
-                do_delay('fast')
-            except:
-                pass
-            driver.execute_script(f"window.scrollTo(0, {randint(1, 500)});")
-        sleep(1)
+            for i in range(randint(5, 40)):
+                try:
+                    random_div = choice(driver.find_elements_by_tag_name('div'))
+                    action.move_to_element(random_div)
+                    action.perform()
+                    do_delay('fast')
+                    driver.execute_script(f"window.scrollTo(0, {randint(1, 500)});")
+                except:
+                    pass
+            sleep(1)
+        except Exception as e:
+            print(e)
 
 
 class TaskRunner(Thread):
@@ -138,7 +141,6 @@ class TaskRunner(Thread):
 
     def run(self):
         sleep(randint(2*60, 20*60))
-
         task_launch_counter = Log.objects.filter(task=self.task).count()
         if self.task.launches_per_day <= task_launch_counter:
             return
@@ -184,6 +186,8 @@ class TaskRunner(Thread):
                 try:
                     hyperlink.find_element_by_tag_name('a').click()
                 except Exception as e:
+                    print("URL can't be visited")
+                    print(hyperlink.find_element_by_tag_name('a').get_attribute('outerHTML'))
                     print(e)
 
                 driver.switch_to.window(driver.window_handles[-1])
