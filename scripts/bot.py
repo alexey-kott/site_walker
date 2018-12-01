@@ -170,55 +170,65 @@ class TaskRunner(Thread):
         driver.find_element_by_id('text').send_keys(self.task.search_query, Keys.ENTER)
         # driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
         sleep(2)
+        current_page = 1
+        while current_page < 10:
 
-        result_items = driver.find_elements_by_class_name('serp-item')
+            result_items = driver.find_elements_by_class_name('serp-item')
 
-        for item in result_items:
-            hyperlink = item.find_element_by_tag_name('h2')
-            links = item.find_elements_by_class_name('link_theme_outer')
+            for item in result_items:
+                hyperlink = item.find_element_by_tag_name('h2')
+                links = item.find_elements_by_class_name('link_theme_outer')
 
-            try:
-                link = links[0]
-                url = link.get_attribute('href')
-            except:
-                continue
-
-            sleep(1)
-
-            if is_same_site(self.task.target_url, url):
                 try:
-                    hyperlink.find_element_by_tag_name('a').click()
-                except Exception as e:
-                    print("URL can't be visited")
-                    print(hyperlink.find_element_by_tag_name('a').get_attribute('outerHTML'))
-                    print(e)
+                    link = links[0]
+                    url = link.get_attribute('href')
+                except:
+                    continue
 
-                driver.switch_to.window(driver.window_handles[-1])
+                sleep(1)
 
-                walk_on_site(driver)
+                if is_same_site(self.task.target_url, url):
+                    try:
+                        hyperlink.find_element_by_tag_name('a').click()
+                    except Exception as e:
+                        print("URL can't be visited")
+                        print(hyperlink.find_element_by_tag_name('a').get_attribute('outerHTML'))
+                        print(e)
 
-                log(user=user, task=self.task, action='VISIT', extra={'visit_url': url}, uid=self.uid)
-                #  заходим на целевой сайт
-                for i in range(5):
-                    driver.execute_script(f"window.scrollTo(0, {randint(300, 700)});")
-                    # driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
-                    sleep(randint(12, 24))
+                    driver.switch_to.window(driver.window_handles[-1])
 
-                sleep(randint(3 * 60, 6 * 60))
+                    walk_on_site(driver)
 
-                break
-            elif is_competitor_site(url, self.task.competitor_sites):
-                log(user=user, task=self.task, action='VISIT', extra={'visit_url': url}, uid=self.uid)
+                    log(user=user, task=self.task, action='VISIT', extra={'visit_url': url}, uid=self.uid)
+                    #  заходим на целевой сайт
+                    for i in range(5):
+                        driver.execute_script(f"window.scrollTo(0, {randint(300, 700)});")
+                        # driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
+                        sleep(randint(12, 24))
 
-                link.click()
-                driver.switch_to.window(driver.window_handles[-1])
-                #  заходим к конкурентам
-                for i in range(5):
-                    sleep(randint(3, 5))
-                    driver.execute_script(f"window.scrollTo(0, {randint(300, 800)});")
+                    sleep(randint(3 * 60, 6 * 60))
 
-                driver.close()
-                driver.switch_to.window(driver.window_handles[0])
+                    break
+                elif is_competitor_site(url, self.task.competitor_sites):
+                    log(user=user, task=self.task, action='VISIT', extra={'visit_url': url}, uid=self.uid)
+
+                    link.click()
+                    driver.switch_to.window(driver.window_handles[-1])
+                    #  заходим к конкурентам
+                    for i in range(5):
+                        sleep(randint(3, 5))
+                        driver.execute_script(f"window.scrollTo(0, {randint(300, 800)});")
+
+                    driver.close()
+                    driver.switch_to.window(driver.window_handles[0])
+
+            pager = driver.find_element_by_class_name('pager')
+            next_page = pager.find_elements_by_tag_name('a')[-1]
+            next_page.click()
+            sleep(1)
+            cur_page = driver.find_element_by_class_name('pager__item_current_yes').get_attribute('innerText')
+            log(user=user, task=self.task, action='NEXT_PAGE', extra={'current_page': cur_page}, uid=self.uid)
+            current_page += 1
 
         driver.close()
         log(user=user, task=self.task, action='FINISH', uid=self.uid)
