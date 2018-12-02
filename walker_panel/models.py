@@ -35,7 +35,7 @@ class Task(models.Model):
     search_query = models.TextField(null=True)
     target_url = models.TextField(null=True)
     competitor_sites = models.TextField(null=True)
-    region = models.ForeignKey(City, on_delete=CASCADE, default=None, null=True)
+    city = models.TextField(default=None, null=True)
     last_start = models.DateTimeField(default=timezone.now, null=True)
     delay = models.IntegerField(default=0)
     launches_per_day = models.IntegerField(default=0)

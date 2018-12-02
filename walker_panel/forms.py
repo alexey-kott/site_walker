@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django.forms import Form, EmailField, CharField, Textarea, ModelForm, URLField, HiddenInput, IntegerField, ModelChoiceField, TypedChoiceField
+from django.forms import Form, EmailField, CharField, Textarea, ModelForm, URLField, HiddenInput, IntegerField, \
+    ModelChoiceField, TypedChoiceField, TextInput
 
 from walker_panel.models import Task, City
 
@@ -23,14 +24,17 @@ class TaskForm(ModelForm):
                                     f'и выполнять целевые действия')
     competitor_sites = CharField(label="Сайты конкурентов (в столбик)", widget=Textarea(attrs={}),
                                  help_text='*эти сайты мы будем быстро покидать')
-    region = ModelChoiceField(queryset=City.objects.all(), empty_label='', label='Указать регион', initial='')
+    city = CharField( label='Указать населённый пункт')
     delay = IntegerField(label='Задержка', help_text='Запускать не чаще, чем раз в n минут')
     launches_per_day = IntegerField(label='Количество запусков в день',
                                     help_text='Максимальное количество запусков в день (0 — без ограничений)')
 
     class Meta:
         model = Task
-        fields = ['name', 'id', 'search_query', 'target_url', 'competitor_sites', 'region', 'delay', 'launches_per_day']
+        fields = ['name', 'id', 'search_query', 'target_url', 'competitor_sites', 'city', 'delay', 'launches_per_day']
+        widgets = {
+            'city': TextInput(attrs={'name': 'city'}),
+        }
 
 
 class ProxyForm(Form):

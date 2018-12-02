@@ -17,6 +17,8 @@
             integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
             crossorigin="anonymous"></script>
     <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <link href="{% static 'css/jquery.kladr.min.css' %}" rel="stylesheet">
+    <script src="{% static 'js/jquery.kladr.min.js' %}"></script>
 
 </head>
 <body>
@@ -61,5 +63,12 @@
 </div>
 
 <script src="{% static 'js/script.js' %}"></script>
+<script>
+    $(function () {
+        $('[name="city"]').kladr({
+            type: $.kladr.type.city
+        });
+    });
+</script>
 </body>
 </html>

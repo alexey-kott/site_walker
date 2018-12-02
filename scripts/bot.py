@@ -73,12 +73,23 @@ def generate_browser_configuration(task: Task) -> Dict[str, str]:
     return config
 
 
-def change_region(driver: Chrome, region: str):
+def change_region(driver: Chrome, city: str) -> None:
     driver.find_element_by_class_name('geolink').click()
     sleep(1)
     city_input = driver.find_element_by_id('city__front-input')
     city_input.clear()
-    city_input.send_keys(region)
+    city_input.send_keys(f" {city} ")
+    sleep(2)
+
+    geo_input = driver.find_element_by_class_name('input__popup_type_geo')
+    localities = geo_input.find_elements_by_tag_name('li')
+    for locality in localities:
+        geo_data = json.loads(locality.get_attribute('data-bem'))
+        item = geo_data['b-autocomplete-item']
+        sleep(1)
+        if item['title'] == city:
+            locality.click()
+            return
     sleep(1)
     city_input.send_keys(Keys.ENTER)
     sleep(1)
@@ -164,8 +175,8 @@ class TaskRunner(Thread):
         driver = get_driver(browser_configuration)
         driver.get(YANDEX_URL)
 
-        if self.task.region.name != '':
-            change_region(driver, self.task.region.name)
+        if self.task.city != '':
+            change_region(driver, self.task.city)
 
         driver.find_element_by_id('text').send_keys(self.task.search_query, Keys.ENTER)
         # driver.save_screenshot(SCREENSHOTS_DIR + f'screenshot_{datetime.now()}.png')
