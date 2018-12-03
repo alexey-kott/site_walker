@@ -86,9 +86,9 @@ def change_region(driver: Chrome, city: str) -> None:
     for locality in localities:
         geo_data = json.loads(locality.get_attribute('data-bem'))
         item = geo_data['b-autocomplete-item']
-        sleep(1)
         if item['title'] == city:
             locality.click()
+            sleep(1)
             return
     sleep(1)
     city_input.send_keys(Keys.ENTER)
