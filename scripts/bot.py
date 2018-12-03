@@ -155,11 +155,6 @@ class TaskRunner(Thread):
 
     def run(self):
         user = self.task.owner
-        prestart_delay = randint(2*60, 20*60)
-        log(user=user, task=self.task, action='TASK_ACTIVATED', uid=self.uid,
-            extra={'message': f'Task will be launch in {prestart_delay} seconds'})
-        sleep(prestart_delay)
-
         if 0 <= self.task.launches_per_day <= self.task.launches_today:  # 0 - there's no launch limits
             return
 
@@ -170,6 +165,12 @@ class TaskRunner(Thread):
             # если с последнего запуска прошло меньше, чем delay минут
             if timezone.now() - timedelta(minutes=self.task.delay) < self.task.last_start:
                 return
+
+        prestart_delay = randint(2*60, 20*60)
+        log(user=user, task=self.task, action='TASK_ACTIVATED', uid=self.uid,
+            extra={'message': f'Task will be launch in {prestart_delay} seconds'})
+        sleep(prestart_delay)
+
         self.task.last_start = timezone.now()
         self.task.save()
 
