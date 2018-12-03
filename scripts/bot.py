@@ -154,7 +154,11 @@ class TaskRunner(Thread):
         self.uid = uuid4()
 
     def run(self):
-        sleep(randint(2*60, 20*60))
+        user = self.task.owner
+        prestart_delay = randint(2*60, 20*60)
+        log(user=user, task=self.task, action='TASK_ACTIVATED', uid=self.uid,
+            extra={'message': f'Task will be launch in {prestart_delay} seconds'})
+        sleep(prestart_delay)
 
         if 0 <= self.task.launches_per_day <= self.task.launches_today:  # 0 - there's no launch limits
             return
@@ -169,7 +173,6 @@ class TaskRunner(Thread):
         self.task.last_start = timezone.now()
         self.task.save()
 
-        user = self.task.owner
         log(user=user, task=self.task, action='LAUNCH', uid=self.uid)
         browser_configuration = generate_browser_configuration(self.task)
         driver = get_driver(browser_configuration)
