@@ -43,7 +43,7 @@ class Task(models.Model):
     @property
     def launches_today(self):
         return Log.objects \
-            .filter(action='LAUNCH') \
+            .filter(action='TASK_ACTIVATED') \
             .filter(task=self).filter(datetime__gt=timezone.now().date()) \
             .filter(datetime__lte=timezone.now().date() + timedelta(days=1)).count()
 

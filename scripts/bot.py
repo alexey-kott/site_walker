@@ -158,8 +158,9 @@ class TaskRunner(Thread):
 
     def run(self):
         user = self.task.owner
-        if 0 <= self.task.launches_per_day <= self.task.launches_today:  # 0 - there's no launch limits
-            return
+        if self.task.launches_per_day <= self.task.launches_today:
+            if self.task.launches_per_day != 0:  # 0 - there's no launch limits
+                return
 
         if self.task.last_start is None:
             self.task.last_start = datetime(1970, 1, 1)
