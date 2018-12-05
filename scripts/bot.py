@@ -261,15 +261,10 @@ def get_driver(config: Dict) -> Chrome:
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
     options.add_argument(f"user-agent={config['user-agent']}")
-    # options.add_argument(f'--proxy-server={config["proxy"]}')
     options.add_argument("--headless")
 
     if config.get('proxy'):
-        proxy = WebDriverProxy({
-            'proxyType': ProxyType.MANUAL,
-            'httpProxy': config['proxy']
-        })
-        proxy.add_to_capabilities(capabilities)
+        options.add_argument(f'--proxy-server={config["proxy"]}')
 
     return Chrome("./webdriver/chromedriver", options=options,
                   desired_capabilities=capabilities)
