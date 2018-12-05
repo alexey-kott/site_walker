@@ -64,3 +64,23 @@
     font-weight: bold;
     font-size: 1.4em;
 }
+
+.hidden-password{
+    display: inline-block;
+    color: #a5a5a5;
+    background-color: #a5a5a5;
+    margin: 2px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.hidden-password:hover{
+    color: #000;
+    background-color: inherit;
+}
+
+.proxy-credentials, .proxy-control-buttons{
+    display: inline-block;
+    width: 15%;
+}

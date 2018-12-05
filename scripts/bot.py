@@ -26,7 +26,7 @@ logger = logging.getLogger('site_walker')
 logger.setLevel(logging.INFO)
 
 SCREENSHOTS_DIR = './screenshots/'
-YANDEX_URL = 'https://yandex.ru'
+YANDEX_URL = 'http://yandex.ru'
 
 
 def get_random_screen_resolution() -> str:
@@ -68,7 +68,10 @@ def generate_browser_configuration(task: Task) -> Dict[str, str]:
         return config
 
     proxy = choice(Proxy.objects.filter(owner=task.owner))
-    config['proxy'] = f"http://{proxy.username}:{proxy.password}@{proxy.host}:{proxy.port}"
+    if proxy.username:
+        config['proxy'] = f"{proxy.username}:{proxy.password}@{proxy.host}:{proxy.port}"
+    else:
+        config['proxy'] = f"{proxy.host}:{proxy.port}"
 
     return config
 
@@ -177,6 +180,7 @@ class TaskRunner(Thread):
         log(user=user, task=self.task, action='LAUNCH', uid=self.uid)
         browser_configuration = generate_browser_configuration(self.task)
         driver = get_driver(browser_configuration)
+
         driver.get(YANDEX_URL)
 
         if self.task.city != '':
@@ -251,11 +255,13 @@ class TaskRunner(Thread):
 
 def get_driver(config: Dict) -> Chrome:
     options = ChromeOptions()
+
     capabilities = DesiredCapabilities.CHROME
     options.add_argument(f"--window-size={config['resolution']}")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
     options.add_argument(f"user-agent={config['user-agent']}")
+    # options.add_argument(f'--proxy-server={config["proxy"]}')
     options.add_argument("--headless")
 
     if config.get('proxy'):

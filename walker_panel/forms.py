@@ -38,8 +38,8 @@ class TaskForm(ModelForm):
 
 
 class ProxyForm(Form):
-    proxies = CharField(label='Список прокси', help_text='Прокси в формате host:port:username:password',
-                        widget=Textarea(attrs={'placeholder': 'host:port:username:password'}))
+    proxies = CharField(label='Список прокси', help_text='Прокси в формате host:port[:username:password]. Пока поддерживаются только HTTP-прокси без авторизации.',
+                        widget=Textarea(attrs={'placeholder': 'host:port[:username:password]', 'rows': 5}))
 
     class Meta:
         fields = ['proxies']

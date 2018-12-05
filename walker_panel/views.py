@@ -53,6 +53,23 @@ def remove_task(request: WSGIRequest, task_id: int):
 
 
 @login_required(login_url='/sign-in/')
+def remove_proxy(request: WSGIRequest, proxy_id: int):
+    Proxy.objects.get(pk=proxy_id).delete()
+    return redirect('/settings/')
+
+
+@login_required(login_url='/sign-in/')
+def change_proxy_status(request: WSGIRequest, proxy_id: int):
+    proxy = Proxy.objects.get(pk=proxy_id)
+    if proxy.status:
+        proxy.status = False
+    else:
+        proxy.status = True
+    proxy.save()
+    return redirect('/settings/')
+
+
+@login_required(login_url='/sign-in/')
 def change_task_status(request: WSGIRequest, task_id: int):
     task = Task.objects.get(pk=task_id)
     if task.status:
@@ -74,14 +91,14 @@ def logs(request: WSGIRequest):
 def settings(request: WSGIRequest):
     if request.method == 'POST':
         proxy_field_text = request.POST['proxies']
-        Proxy.objects.filter(owner=request.user).delete()
         asyncio.run(save_proxies(user=request.user, text_data=proxy_field_text))
 
     proxies = Proxy.objects.filter(owner=request.user)
-    proxy_list = [f"{p.host}:{p.port}:{p.username}:{p.password}" for p in proxies]
-    proxy_form = ProxyForm(initial={'proxies': '\n'.join(proxy_list)})
+
     return render(request, 'walker_panel/settings.html',
-                  {'proxy_form': proxy_form, 'is_walker_enable': is_service_running('walker')})
+                  {'proxy_form': ProxyForm(),
+                   'is_walker_enable': is_service_running('walker'),
+                   'proxies': proxies})
 
 
 def sign_up(request: WSGIRequest):

@@ -9,15 +9,15 @@ from datetime import datetime, timedelta
 
 class Proxy(models.Model):
     owner = models.ForeignKey(User, on_delete=CASCADE)
-    proxy_id = models.IntegerField(primary_key=True, auto_created=True)
     host = models.TextField()
     port = models.IntegerField()
-    username = models.TextField()
-    password = models.TextField()
+    username = models.TextField(null=True)
+    password = models.TextField(null=True)
     enabled = models.BooleanField()
+    status = models.BooleanField(default=True)
 
     class Meta:
-        unique_together = ('owner', 'host', 'port', 'username')
+        unique_together = ('owner', 'host', 'port')
 
 
 class City(models.Model):
