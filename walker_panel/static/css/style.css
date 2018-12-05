@@ -84,3 +84,14 @@
     display: inline-block;
     width: 15%;
 }
+
+.log-row{
+    padding: 5px;
+    margin: 1px;
+    display: block;
+}
+
+.highlight-row{
+    background: rgba(100, 134, 221, 0.4);
+    border-radius: 8px;
+}
