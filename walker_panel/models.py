@@ -31,6 +31,7 @@ class Task(models.Model):
     owner = models.ForeignKey(User, on_delete=CASCADE)
     name = models.TextField(default='')
     status = models.BooleanField(default=True)
+    is_running = models.BooleanField(default=False)
 
     search_query = models.TextField(null=True)
     target_url = models.TextField(null=True)
