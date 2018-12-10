@@ -215,10 +215,10 @@ class TaskRunner(Thread):
             result_items = driver.find_elements_by_class_name('serp-item')
 
             for item in result_items:
-                hyperlink = item.find_element_by_tag_name('h2')
-                links = item.find_elements_by_class_name('link_theme_outer')
-
                 try:
+                    hyperlink = item.find_element_by_tag_name('h2')
+                    links = item.find_elements_by_class_name('link_theme_outer')
+
                     link = links[0]
                     url = link.get_attribute('href')
                 except Exception as e:
