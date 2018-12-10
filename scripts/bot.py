@@ -195,7 +195,7 @@ class TaskRunner(Thread):
             self.stalk_sites_in_yandex(driver)
             log(user=self.task.owner, task=self.task, action='FINISH', uid=self.uid)
         except Exception as e:
-            logging.exception('Stalking have catch exception')
+            logging.exception('Stalking did catch exception')
             log(user=self.task.owner, task=self.task, action='CRASHED', uid=self.uid)
         finally:
             self.task.is_running = False
@@ -293,12 +293,18 @@ def log(user: User, task: Task, action: str, level: str = 'info', extra: dict = 
 
 def run():
     threads = {}
-    for task in Task.objects.filter(status=True).filter(is_running=False):
-        threads[task.id] = TaskRunner(task=task)
-        threads[task.id].daemon = True
-        threads[task.id].start()
+    try:
+        for task in Task.objects.filter(status=True).filter(is_running=False):
+            threads[task.id] = TaskRunner(task=task)
+            threads[task.id].daemon = True
+            threads[task.id].start()
 
-    for task_id, task_runner in threads.items():
-        task_runner.join()
+        for task_id, task_runner in threads.items():
+            task_runner.join()
 
-    sleep(5)
+        sleep(5)
+    except KeyboardInterrupt:
+        for task_id, task_runner in threads.items():
+            task = Task.objects.get(pk=task_id)
+            task.is_running = False
+            task.save()
